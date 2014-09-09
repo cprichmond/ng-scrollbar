@@ -1,11 +1,12 @@
 'use strict';
 
 angular.module('ngScrollbar', []).
-  directive('ngScrollbar', ['$parse', '$window', function($parse, $window) {
+  directive('ngScrollbar', ['$rootScope', '$parse', '$window', function($rootScope, $parse, $window) {
     return {
       restrict: 'A',
       replace: true,
       transclude: true,
+      scope: true,
       link: function(scope, element, attrs) {
 
         var mainElm, transculdedContainer, tools, thumb, thumbLine, track;
@@ -200,7 +201,7 @@ angular.module('ngScrollbar', []).
 
         if (!!attrs.rebuildOn) {
           attrs.rebuildOn.split(' ').forEach(function (eventName) {
-            scope.$on(eventName, rebuild);
+            $rootScope.$on(eventName, rebuild);
           });
         }
 
