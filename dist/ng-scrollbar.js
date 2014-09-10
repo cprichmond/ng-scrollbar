@@ -13,7 +13,7 @@ angular.module('ngScrollbar', []).directive('ngScrollbar', [
         var mainElm, transculdedContainer, tools, thumb, thumbLine, track, rebuildListner;
         var flags = {
             bottom: attrs.hasOwnProperty('bottom'),
-            top: attrs.hasOwnProperty('bottom')
+            top: attrs.hasOwnProperty('top')
           };
         var win = angular.element($window);
         // Elements
@@ -142,16 +142,17 @@ angular.module('ngScrollbar', []).directive('ngScrollbar', [
           }
         };
         var rebuildTimer;
+        var options = {};
         var rebuild = function (e, data) {
           /* jshint -W116 */
           if (rebuildTimer != null) {
             clearTimeout(rebuildTimer);
           }
           /* jshint +W116 */
-          var options = {
-              rollToBottom: !!data && !!data.rollToBottom,
-              rollToTop: !!data && !!data.rollToTop
-            };
+          options = {
+            rollToBottom: !!data && !!data.rollToBottom,
+            rollToTop: !!data && !!data.rollToTop
+          };
           rebuildTimer = setTimeout(function () {
             page.height = null;
             buildScrollbar(options);
@@ -160,7 +161,7 @@ angular.module('ngScrollbar', []).directive('ngScrollbar', [
             }
           }, 72);
         };
-        buildScrollbar();
+        buildScrollbar(options);
         if (!!attrs.rebuildOn) {
           attrs.rebuildOn.split(' ').forEach(function (eventName) {
             rebuildListner = $rootScope.$on(eventName, rebuild);
