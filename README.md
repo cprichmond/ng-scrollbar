@@ -55,6 +55,11 @@ In case you need to stick content to bottom (chat or something) use "bottom" opt
   <div class="scrollme" ng-scrollbar bottom > .... </div>
   ```
 
+If you want the content to always be at the top use the "top" option.
+  ```html
+  <div class="scrollme" ng-scrollbar top > .... </div>
+  ```
+
 ## Examples
 See the example in the respository.
 
