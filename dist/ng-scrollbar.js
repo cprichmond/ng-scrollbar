@@ -10,7 +10,7 @@ angular.module('ngScrollbar', []).directive('ngScrollbar', [
       transclude: true,
       scope: true,
       link: function (scope, element, attrs) {
-        var mainElm, transculdedContainer, tools, thumb, thumbLine, track, rebuildListner;
+        var mainElm, transculdedContainer, tools, thumb, thumbLine, track, rebuildListener;
         var flags = {
             bottom: attrs.hasOwnProperty('bottom'),
             top: attrs.hasOwnProperty('top')
@@ -164,14 +164,16 @@ angular.module('ngScrollbar', []).directive('ngScrollbar', [
         buildScrollbar(options);
         if (!!attrs.rebuildOn) {
           attrs.rebuildOn.split(' ').forEach(function (eventName) {
-            rebuildListner = $rootScope.$on(eventName, rebuild);
+            rebuildListener = $rootScope.$on(eventName, rebuild);
           });
         }
         if (attrs.hasOwnProperty('rebuildOnResize')) {
           win.on('resize', rebuild);
         }
         scope.$on('$destroy', function () {
-          rebuildListner();
+          if (angular.isFunction(rebuildListener)) {
+            rebuildListener();
+          }
         });
       },
       template: '<div>' + '<div class="ngsb-wrap">' + '<div class="ngsb-container" ng-transclude></div>' + '<div class="ngsb-scrollbar" style="position: absolute; display: block;" ng-show="showYScrollbar">' + '<div class="ngsb-thumb-container">' + '<div class="ngsb-thumb-pos" oncontextmenu="return false;">' + '<div class="ngsb-thumb" ></div>' + '</div>' + '<div class="ngsb-track"></div>' + '</div>' + '</div>' + '</div>' + '</div>'
