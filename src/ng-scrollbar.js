@@ -3,7 +3,8 @@ angular.module('ngScrollbar', []).directive('ngScrollbar', [
   '$rootScope',
   '$parse',
   '$window',
-  function ($rootScope, $parse, $window) {
+  '$document',
+  function ($rootScope, $parse, $window, $document) {
     return {
       restrict: 'A',
       replace: true,
@@ -28,7 +29,7 @@ angular.module('ngScrollbar', []).directive('ngScrollbar', [
             height: '100%'
           };
           if (page.height) {
-            scrollboxStyle.height = page.height + 'px';
+            scrollboxStyle.height = (page.height - page.extraHeight) + 'px';
           }
           draggerStyle = {
             position: 'absolute',
@@ -47,8 +48,8 @@ angular.module('ngScrollbar', []).directive('ngScrollbar', [
         };
         var redraw = function () {
           thumb.css('top', dragger.top + 'px');
-          var draggerOffset = dragger.top / page.height;
-          page.top = -Math.round(page.scrollHeight * draggerOffset);
+          var draggerOffset = dragger.top / (dragger.trackHeight - page.extraHeight);
+          page.top = -Math.round((page.scrollHeight + page.extraHeight) * draggerOffset);
           transculdedContainer.css('top', page.top + 'px');
         };
         var trackClick = function (event) {
@@ -62,7 +63,7 @@ angular.module('ngScrollbar', []).directive('ngScrollbar', [
           var wheelDivider = 20;
           // so it can be changed easily
           var deltaY = event.wheelDeltaY !== undefined ? event.wheelDeltaY / wheelDivider : event.wheelDelta !== undefined ? event.wheelDelta / wheelDivider : -event.detail * (wheelDivider / 10);
-          dragger.top = Math.max(0, Math.min(parseInt(page.height, 10) - parseInt(dragger.height, 10), parseInt(dragger.top, 10) - deltaY));
+          dragger.top = Math.max(0, Math.min(parseInt(dragger.trackHeight, 10) - parseInt(dragger.height, 10), parseInt(dragger.top, 10) - deltaY));
           redraw();
           if (!!event.preventDefault) {
             event.preventDefault();
@@ -82,9 +83,23 @@ angular.module('ngScrollbar', []).directive('ngScrollbar', [
           thumbDrag(event, newOffsetX, newOffsetY);
           redraw();
         };
+        var getStyle = function (el, styleProp) {
+          var val;
+          if (el.currentStyle) {
+            val = el.currentStyle[styleProp];
+          } else if ($window.getComputedStyle) {
+            val = $document[0].defaultView.getComputedStyle(el, null).getPropertyValue(styleProp);
+          }
+          return val;
+        };
         var buildScrollbar = function (options) {
           // Getting top position of a parent element to place scroll correctly
           var parentOffsetTop = element[0].parentElement.offsetTop;
+          var paddingTop = parseInt(getStyle(element[0], 'padding-top'), 10);
+          var paddingBottom = parseInt(getStyle(element[0], 'padding-bottom'), 10);
+          var borderTop = parseInt(getStyle(element[0], 'border-top-width'), 10);
+          var borderBottom = parseInt(getStyle(element[0], 'border-bottom-width'), 10);
+          var extraHeight = paddingTop + paddingBottom + borderTop + borderBottom;
           var wheelEvent = win[0].onmousewheel !== undefined ? 'mousewheel' : 'DOMMouseScroll';
           var rollToBottom = flags.bottom || options.rollToBottom;
           var rollToTop = flags.top || options.rollToTop;
@@ -96,6 +111,7 @@ angular.module('ngScrollbar', []).directive('ngScrollbar', [
           track = angular.element(angular.element(tools.children()[0]).children()[1]);
           // Check if scroll bar is needed
           page.height = element[0].offsetHeight - parentOffsetTop;
+          page.extraHeight = extraHeight;
           page.scrollHeight = transculdedContainer[0].scrollHeight;
           if (page.height < page.scrollHeight) {
             scope.showYScrollbar = true;
@@ -126,10 +142,9 @@ angular.module('ngScrollbar', []).directive('ngScrollbar', [
             if (rollToBottom) {
               flags.bottom = false;
               dragger.top = parseInt(page.height, 10) - parseInt(dragger.height, 10);
-            } else if(rollToTop) {
+            } else if (rollToTop) {
               dragger.top = 0;
-            }
-            else {
+            } else {
               dragger.top = Math.max(0, Math.min(parseInt(page.height, 10) - parseInt(dragger.height, 10), parseInt(dragger.top, 10)));
             }
             redraw();
@@ -171,8 +186,8 @@ angular.module('ngScrollbar', []).directive('ngScrollbar', [
         if (attrs.hasOwnProperty('rebuildOnResize')) {
           win.on('resize', rebuild);
         }
-        scope.$on('$destroy', function(){
-          if(angular.isFunction(rebuildListener)){
+        scope.$on('$destroy', function () {
+          if (angular.isFunction(rebuildListener)) {
             rebuildListener();
           }
         });
