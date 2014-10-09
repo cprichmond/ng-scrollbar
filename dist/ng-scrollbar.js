@@ -95,10 +95,10 @@ angular.module('ngScrollbar', []).directive('ngScrollbar', [
         var buildScrollbar = function (options) {
           // Getting top position of a parent element to place scroll correctly
           var parentOffsetTop = element[0].parentElement.offsetTop;
-          var paddingTop = parseInt(getStyle(element[0], 'padding-top'), 10);
-          var paddingBottom = parseInt(getStyle(element[0], 'padding-bottom'), 10);
-          var borderTop = parseInt(getStyle(element[0], 'border-top-width'), 10);
-          var borderBottom = parseInt(getStyle(element[0], 'border-bottom-width'), 10);
+          var paddingTop = parseInt(getStyle(element[0], 'padding-top'), 10) || 0;
+          var paddingBottom = parseInt(getStyle(element[0], 'padding-bottom'), 10) || 0;
+          var borderTop = parseInt(getStyle(element[0], 'border-top-width'), 10) || 0;
+          var borderBottom = parseInt(getStyle(element[0], 'border-bottom-width'), 10) || 0;
           var extraHeight = paddingTop + paddingBottom + borderTop + borderBottom;
           var wheelEvent = win[0].onmousewheel !== undefined ? 'mousewheel' : 'DOMMouseScroll';
           var rollToBottom = flags.bottom || options.rollToBottom;
